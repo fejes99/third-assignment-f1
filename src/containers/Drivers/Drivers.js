@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { BeatLoader } from 'react-spinners';
 
 import './Drivers.css';
+import Loader from '../../components/Loader/Loader';
 import { constructorDetailsHandler, driverDetailsHandler, driversFilter } from '../../helper';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import YearPicker from '../../components/YearPicker/YearPicker';
@@ -21,9 +21,8 @@ export class Drivers extends Component {
 
   fetchDrivers = () => {
     axios.get(`http://ergast.com/api/f1/${this.state.year}/driverStandings.json`).then((res) => {
-      const data = res.data.MRData.StandingsTable.StandingsLists[0];
       this.setState({
-        driverStandings: data.DriverStandings,
+        driverStandings: res.data.MRData.StandingsTable.StandingsLists[0].DriverStandings,
         loading: false,
       });
     });
@@ -31,12 +30,9 @@ export class Drivers extends Component {
 
   searchHandler = (event) => {
     const query = event.target.value;
-    this.setState(
-      {
-        query: query,
-      },
-      () => driversFilter(this.state.driverStandings, this.state.query)
-    );
+    this.setState({
+      query: query,
+    });
   };
 
   yearHandler = (event) => {
@@ -52,9 +48,9 @@ export class Drivers extends Component {
   render() {
     const { driverStandings, year, query, loading } = this.state;
     const standings = driversFilter(driverStandings, query);
-    const driversTable = loading ? (
-      <BeatLoader color='#353a40' />
-    ) : (
+
+    if (loading) return <Loader />;
+    const driversTable = (
       <table>
         <thead>
           <tr>

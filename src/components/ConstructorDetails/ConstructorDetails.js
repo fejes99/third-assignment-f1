@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { BeatLoader } from 'react-spinners';
 
 import './ConstructorDetails.css';
 import {
@@ -10,6 +9,7 @@ import {
   sumPoints,
 } from '../../helper';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
+import Loader from '../Loader/Loader';
 
 class ConstructorDetails extends Component {
   state = {
@@ -23,16 +23,15 @@ class ConstructorDetails extends Component {
     const query = new URLSearchParams(this.props.location.search);
     const year = query.get('year');
 
-    Promise.all([
-      axios.get(`http://ergast.com/api/f1/${year}/constructors/${id}/constructorStandings.json`),
-      axios.get(`http://ergast.com/api/f1/${year}/constructors/${id}/results.json`),
-      axios.get(
-        'https://raw.githubusercontent.com/Dinuks/country-nationality-list/master/countries.json'
-      ),
-    ]).then((res) => {
+    let endpoints = [
+      `http://ergast.com/api/f1/${year}/constructors/${id}/constructorStandings.json`,
+      `http://ergast.com/api/f1/${year}/constructors/${id}/results.json`,
+      'https://raw.githubusercontent.com/Dinuks/country-nationality-list/master/countries.json',
+    ];
+
+    axios.all(endpoints.map((endpoint) => axios.get(endpoint))).then((res) => {
       const constructor =
         res[0].data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings[0];
-      const results = res[1].data.MRData.RaceTable.Races;
       const countryCode = nationalityToCountryCodeConverter(
         res[2].data,
         constructor.Constructor.nationality
@@ -40,7 +39,7 @@ class ConstructorDetails extends Component {
 
       this.setState({
         constructor: constructor,
-        results: results,
+        results: res[1].data.MRData.RaceTable.Races,
         year: year,
         countryCode: countryCode,
         loading: false,
@@ -50,9 +49,10 @@ class ConstructorDetails extends Component {
 
   render() {
     const { loading, constructor, year, countryCode, results } = this.state;
-    const constructorContent = loading ? (
-      <BeatLoader color='#353a40' />
-    ) : (
+
+    if (loading) return <Loader />;
+
+    const constructorContent = (
       <div>
         <Breadcrumb elements={['constructors', `${constructor.Constructor.constructorId}`]} />
         <div className='constructor-details'>
@@ -167,6 +167,7 @@ class ConstructorDetails extends Component {
         </table>
       </div>
     );
+
     return <div className='container'>{constructorContent}</div>;
   }
 }

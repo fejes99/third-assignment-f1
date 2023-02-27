@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { BeatLoader } from 'react-spinners';
 
 import './RaceDetails.css';
 import {
@@ -9,6 +8,7 @@ import {
   nationalityToCountryCodeConverter,
 } from '../../helper';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
+import Loader from '../Loader/Loader';
 
 export class RaceDetails extends Component {
   state = {
@@ -24,36 +24,43 @@ export class RaceDetails extends Component {
     const query = new URLSearchParams(this.props.location.search);
     const year = query.get('year');
 
-    Promise.all([
-      axios.get(`https://ergast.com/api/f1/${year}/${id}/qualifying.json`),
-      axios.get(`https://ergast.com/api/f1/${year}/${id}/results.json`),
-      axios.get(
-        'https://raw.githubusercontent.com/Dinuks/country-nationality-list/master/countries.json'
-      ),
-    ]).then((res) => {
-      const qualiResults = res[0].data.MRData.RaceTable.Races[0].QualifyingResults;
-      const raceResults = res[1].data.MRData.RaceTable.Races[0].Results;
+    let endpoints = [
+      `https://ergast.com/api/f1/${year}/${id}/qualifying.json`,
+      `https://ergast.com/api/f1/${year}/${id}/results.json`,
+      'https://raw.githubusercontent.com/Dinuks/country-nationality-list/master/countries.json',
+    ];
+
+    axios.all(endpoints.map((endpoint) => axios.get(endpoint))).then((res) => {
       const circuitData = res[1].data.MRData.RaceTable.Races[0].Circuit;
       const countryCode = nationalityToCountryCodeConverter(
         res[2].data,
         circuitData.Location.country
       );
       this.setState({
-        qualiResults: qualiResults,
-        raceResults: raceResults,
+        qualiResults: res[0].data.MRData.RaceTable.Races[0].QualifyingResults,
+        raceResults: res[1].data.MRData.RaceTable.Races[0].Results,
         circuitData: circuitData,
         year: year,
         countryCode: countryCode,
         loading: false,
       });
     });
+
+    Promise.all([
+      axios.get(`https://ergast.com/api/f1/${year}/${id}/qualifying.json`),
+      axios.get(`https://ergast.com/api/f1/${year}/${id}/results.json`),
+      axios.get(
+        'https://raw.githubusercontent.com/Dinuks/country-nationality-list/master/countries.json'
+      ),
+    ]).then((res) => {});
   }
 
   render() {
     const { loading, qualiResults, raceResults, circuitData, countryCode, year } = this.state;
-    const raceContent = loading ? (
-      <BeatLoader color='#353a40' />
-    ) : (
+
+    if (loading) return <Loader />;
+
+    const raceContent = (
       <div>
         <Breadcrumb elements={['races', `${circuitData.circuitId}`]} />
         <div className='race-details'>

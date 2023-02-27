@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { BeatLoader } from 'react-spinners';
 
 import './DriverDetails.css';
 import {
@@ -10,6 +9,7 @@ import {
   raceDetailsHandler,
 } from '../../helper';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
+import Loader from '../Loader/Loader';
 
 export class DriverDetails extends Component {
   state = {
@@ -24,19 +24,18 @@ export class DriverDetails extends Component {
     const query = new URLSearchParams(this.props.location.search);
     const year = query.get('year');
 
-    Promise.all([
-      axios.get(`http://ergast.com/api/f1/${year}/drivers/${id}/driverStandings.json`),
-      axios.get(`http://ergast.com/api/f1/${year}/drivers/${id}/results.json`),
-      axios.get(
-        'https://raw.githubusercontent.com/Dinuks/country-nationality-list/master/countries.json'
-      ),
-    ]).then((res) => {
+    let endpoints = [
+      `http://ergast.com/api/f1/${year}/drivers/${id}/driverStandings.json`,
+      `http://ergast.com/api/f1/${year}/drivers/${id}/results.json`,
+      'https://raw.githubusercontent.com/Dinuks/country-nationality-list/master/countries.json',
+    ];
+
+    axios.all(endpoints.map((endpoint) => axios.get(endpoint))).then((res) => {
       const driver = res[0].data.MRData.StandingsTable.StandingsLists[0].DriverStandings[0];
-      const results = res[1].data.MRData.RaceTable.Races;
       const countryCode = nationalityToCountryCodeConverter(res[2].data, driver.Driver.nationality);
       this.setState({
         driver: driver,
-        results: results,
+        results: res[1].data.MRData.RaceTable.Races,
         year: year,
         countryCode: countryCode,
         loading: false,
@@ -46,9 +45,10 @@ export class DriverDetails extends Component {
 
   render() {
     const { loading, driver, countryCode, year, results } = this.state;
-    const driverContent = loading ? (
-      <BeatLoader color='#353a40' />
-    ) : (
+
+    if (loading) return <Loader />;
+
+    const driverContent = (
       <div>
         <Breadcrumb elements={['drivers', `${driver.Driver.driverId}`]} />
         <div className='driver-details'>

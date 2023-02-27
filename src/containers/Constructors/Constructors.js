@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { BeatLoader } from 'react-spinners';
+
 import './Constructors.css';
 import { constructorDetailsHandler, constructorsFilter } from '../../helper';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import YearPicker from '../../components/YearPicker/YearPicker';
+import Loader from '../../components/Loader/Loader';
 
 export class Constructors extends Component {
   state = {
@@ -22,9 +23,9 @@ export class Constructors extends Component {
     axios
       .get(`http://ergast.com/api/f1/${this.state.year}/constructorStandings.json`)
       .then((res) => {
-        const data = res.data.MRData.StandingsTable.StandingsLists[0];
         this.setState({
-          constructorStandings: data.ConstructorStandings,
+          constructorStandings:
+            res.data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings,
           loading: false,
         });
       });
@@ -32,12 +33,9 @@ export class Constructors extends Component {
 
   searchHandler = (event) => {
     const query = event.target.value;
-    this.setState(
-      {
-        query: query,
-      },
-      () => constructorsFilter(this.state.constructorStandings, this.state.query)
-    );
+    this.setState({
+      query: query,
+    });
   };
 
   yearHandler = (event) => {
@@ -53,9 +51,9 @@ export class Constructors extends Component {
   render() {
     const { loading, query, year } = this.state;
     const constructorStandings = constructorsFilter(this.state.constructorStandings, query);
-    const constructorsTable = loading ? (
-      <BeatLoader color='#353a40' />
-    ) : (
+
+    if (loading) return <Loader />;
+    const constructorsTable = (
       <table>
         <thead>
           <tr>

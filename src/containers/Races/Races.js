@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { BeatLoader } from 'react-spinners';
+
 import './Races.css';
 import {
   getFormattedDate,
@@ -11,6 +11,7 @@ import {
 } from '../../helper';
 import Breadcrumb from '../../components/Breadcrumb/Breadcrumb';
 import YearPicker from '../../components/YearPicker/YearPicker';
+import Loader from '../../components/Loader/Loader';
 
 export class Races extends Component {
   state = {
@@ -26,9 +27,8 @@ export class Races extends Component {
 
   fetchRaces = () => {
     axios.get(`http://ergast.com/api/f1/${this.state.year}/results/1.json`).then((res) => {
-      const data = res.data.MRData.RaceTable.Races;
       this.setState({
-        races: data,
+        races: res.data.MRData.RaceTable.Races,
         loading: false,
       });
     });
@@ -36,12 +36,9 @@ export class Races extends Component {
 
   searchHandler = (event) => {
     const query = event.target.value;
-    this.setState(
-      {
-        query: query,
-      },
-      () => racesFilter(this.state.races, this.state.query)
-    );
+    this.setState({
+      query: query,
+    });
   };
 
   yearHandler = (event) => {
@@ -57,9 +54,9 @@ export class Races extends Component {
   render() {
     const { loading, query, year } = this.state;
     const races = racesFilter(this.state.races, query);
-    const racesTable = loading ? (
-      <BeatLoader color='#353a40' />
-    ) : (
+
+    if (loading) return <Loader />;
+    const racesTable = (
       <table>
         <thead>
           <tr>
