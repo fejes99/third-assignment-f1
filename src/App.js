@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Route, Switch, withRouter } from 'react-router-dom';
 
 import './App.css';
 import Navbar from './components/Navbar/Navbar';
@@ -9,28 +9,43 @@ import Races from './containers/Races/Races';
 import DriverDetails from './components/DriverDetails/DriverDetails';
 import ConstructorDetails from './components/ConstructorDetails/ConstructorDetails';
 import RaceDetails from './components/RaceDetails/RaceDetails';
+import Welcome from './containers/Welcome/Welcome';
 
 class App extends Component {
+  state = {
+    year: 2022,
+  };
+
+  yearHandler = (year) => {
+    this.setState({ year }, () => this.props.history.push(`/drivers?year=${year}`));
+  };
+
   render() {
     return (
       <div className='App'>
-        <Navbar />
-        <Switch>
-          <div className='main'>
-            <div className='wrapper'>
+        <Navbar year={this.state.year} />
+        <div className='main'>
+          <div className='wrapper'>
+            <Switch>
               <Route path='/drivers/:id' component={DriverDetails} />
-              <Route exact path='/drivers' component={Drivers} />
+              <Route path='/drivers' component={() => <Drivers yearHandler={this.yearHandler} />} />
               <Route path='/constructors/:id' component={ConstructorDetails} />
-              <Route exact path='/constructors' component={Constructors} />
+              <Route
+                path='/constructors'
+                component={() => <Constructors yearHandler={this.yearHandler} />}
+              />
               <Route path='/races/:id' component={RaceDetails} />
-              <Route exact path='/races' component={Races} />
-              <Route exact path='/' component={() => <Redirect to='/drivers' />} />
-            </div>
+              <Route path='/races' component={() => <Races yearHandler={this.yearHandler} />} />
+              <Route
+                path='/'
+                component={() => <Welcome year={this.state.year} yearHandler={this.yearHandler} />}
+              />
+            </Switch>
           </div>
-        </Switch>
+        </div>
       </div>
     );
   }
 }
 
-export default App;
+export default withRouter(App);

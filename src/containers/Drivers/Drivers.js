@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
 import axios from 'axios';
 
 import './Drivers.css';
@@ -10,13 +11,22 @@ import YearPicker from '../../components/YearPicker/YearPicker';
 export class Drivers extends Component {
   state = {
     driverStandings: [],
-    year: 2022,
+    year: null,
     query: '',
     loading: true,
   };
+  com;
 
   componentDidMount() {
-    this.fetchDrivers();
+    const year = new URLSearchParams(this.props.location.search).get('year');
+    this.setState(
+      {
+        year,
+      },
+      () => {
+        this.fetchDrivers();
+      }
+    );
   }
 
   fetchDrivers = () => {
@@ -36,9 +46,9 @@ export class Drivers extends Component {
   };
 
   yearHandler = (event) => {
+    this.props.yearHandler(event.target.value);
     this.setState(
       {
-        year: event.target.value,
         loading: true,
       },
       () => this.fetchDrivers()
@@ -96,7 +106,7 @@ export class Drivers extends Component {
 
     return (
       <div className='container'>
-        <Breadcrumb elements={['drivers']} />
+        <Breadcrumb year={this.state.year} elements={['drivers']} />
         <div className='header'>
           <h1 className='title'>
             <YearPicker year={year} onChange={this.yearHandler} /> Driver Standings
@@ -116,4 +126,4 @@ export class Drivers extends Component {
   }
 }
 
-export default Drivers;
+export default withRouter(Drivers);

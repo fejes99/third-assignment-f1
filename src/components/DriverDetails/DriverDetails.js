@@ -21,8 +21,7 @@ export class DriverDetails extends Component {
 
   componentDidMount() {
     const { id } = this.props.match.params;
-    const query = new URLSearchParams(this.props.location.search);
-    const year = query.get('year');
+    const year = new URLSearchParams(this.props.location.search).get('year');
 
     let endpoints = [
       `http://ergast.com/api/f1/${year}/drivers/${id}/driverStandings.json`,
@@ -50,7 +49,7 @@ export class DriverDetails extends Component {
 
     const driverContent = (
       <div>
-        <Breadcrumb elements={['drivers', `${driver.Driver.driverId}`]} />
+        <Breadcrumb year={this.state.year} elements={['drivers', `${driver.Driver.driverId}`]} />
         <div className='driver-details'>
           <div className='driver-profile'>
             <img

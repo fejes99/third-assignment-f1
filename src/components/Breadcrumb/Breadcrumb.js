@@ -3,10 +3,6 @@ import { Link, withRouter } from 'react-router-dom';
 import './Breadcrumb.css';
 
 class Breadcrumb extends Component {
-  handleClick = (path) => {
-    this.props.history.push(path);
-  };
-
   render() {
     const { elements } = this.props;
     return (
@@ -18,9 +14,7 @@ class Breadcrumb extends Component {
               {index === elements.length - 1 ? (
                 element.replace(/_/g, ' ')
               ) : (
-                <Link to={path} onClick={() => this.handleClick(path)}>
-                  {element.replace(/_/g, ' ')}
-                </Link>
+                <Link to={`${path}?year=${this.props.year}`}>{element.replace(/_/g, ' ')}</Link>
               )}
             </li>
           );

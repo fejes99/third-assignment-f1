@@ -21,8 +21,7 @@ export class RaceDetails extends Component {
 
   componentDidMount() {
     const { id } = this.props.match.params;
-    const query = new URLSearchParams(this.props.location.search);
-    const year = query.get('year');
+    const year = new URLSearchParams(this.props.location.search).get('year');
 
     let endpoints = [
       `https://ergast.com/api/f1/${year}/${id}/qualifying.json`,
@@ -62,7 +61,7 @@ export class RaceDetails extends Component {
 
     const raceContent = (
       <div>
-        <Breadcrumb elements={['races', `${circuitData.circuitId}`]} />
+        <Breadcrumb year={this.state.year} elements={['races', `${circuitData.circuitId}`]} />
         <div className='race-details'>
           <div className='race-profile'>
             <h1>{circuitData.circuitName}</h1>

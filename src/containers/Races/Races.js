@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
 import axios from 'axios';
 
 import './Races.css';
@@ -16,13 +17,21 @@ import Loader from '../../components/Loader/Loader';
 export class Races extends Component {
   state = {
     races: [],
-    year: 2022,
+    year: null,
     query: '',
     loading: true,
   };
 
   componentDidMount() {
-    this.fetchRaces();
+    const year = new URLSearchParams(this.props.location.search).get('year');
+    this.setState(
+      {
+        year,
+      },
+      () => {
+        this.fetchRaces();
+      }
+    );
   }
 
   fetchRaces = () => {
@@ -42,9 +51,9 @@ export class Races extends Component {
   };
 
   yearHandler = (event) => {
+    this.props.yearHandler(event.target.value);
     this.setState(
       {
-        year: event.target.value,
         loading: true,
       },
       () => this.fetchRaces()
@@ -112,7 +121,7 @@ export class Races extends Component {
 
     return (
       <div className='container'>
-        <Breadcrumb elements={['races']} />
+        <Breadcrumb year={this.state.year} elements={['races']} />
 
         <div className='header'>
           <h1 className='title'>
@@ -132,4 +141,4 @@ export class Races extends Component {
   }
 }
 
-export default Races;
+export default withRouter(Races);

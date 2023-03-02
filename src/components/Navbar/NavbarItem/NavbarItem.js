@@ -1,15 +1,24 @@
 import React, { Component } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, withRouter } from 'react-router-dom';
 import './NavbarItem.css';
 
 export class NavbarItem extends Component {
-  render(props) {
+  isActive = () => {
+    const pathName = this.props.location.pathname.replace('/', '');
+    const year = new URLSearchParams(this.props.location.search).get('year');
+
+    return pathName.toLowerCase() === this.props.name.toLowerCase() && year === this.props.year;
+  };
+
+  render() {
     return (
       <div className='navbar-item'>
-        <NavLink to={this.props.link}>{this.props.name}</NavLink>
+        <NavLink to={this.props.link} isActive={this.isActive} activeClassName='active'>
+          {this.props.name}
+        </NavLink>
       </div>
     );
   }
 }
 
-export default NavbarItem;
+export default withRouter(NavbarItem);

@@ -54,7 +54,10 @@ class ConstructorDetails extends Component {
 
     const constructorContent = (
       <div>
-        <Breadcrumb elements={['constructors', `${constructor.Constructor.constructorId}`]} />
+        <Breadcrumb
+          year={this.state.year}
+          elements={['constructors', `${constructor.Constructor.constructorId}`]}
+        />
         <div className='constructor-details'>
           <div className='constructor-stats'>
             <div className='constructor-stats__name'>

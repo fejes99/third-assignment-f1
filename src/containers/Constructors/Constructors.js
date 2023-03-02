@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router';
 import axios from 'axios';
 
 import './Constructors.css';
@@ -10,13 +11,21 @@ import Loader from '../../components/Loader/Loader';
 export class Constructors extends Component {
   state = {
     constructorStandings: [],
-    year: 2022,
+    year: null,
     query: '',
     loading: true,
   };
 
   componentDidMount() {
-    this.fetchConstructors();
+    const year = new URLSearchParams(this.props.location.search).get('year');
+    this.setState(
+      {
+        year,
+      },
+      () => {
+        this.fetchConstructors();
+      }
+    );
   }
 
   fetchConstructors = () => {
@@ -39,9 +48,10 @@ export class Constructors extends Component {
   };
 
   yearHandler = (event) => {
+    console.log('first');
+    this.props.yearHandler(event.target.value);
     this.setState(
       {
-        year: event.target.value,
         loading: true,
       },
       () => this.fetchConstructors()
@@ -88,7 +98,7 @@ export class Constructors extends Component {
 
     return (
       <div className='container'>
-        <Breadcrumb elements={['constructors']} />
+        <Breadcrumb year={this.state.year} elements={['constructors']} />
         <div className='header'>
           <h1 className='title'>
             <YearPicker year={year} onChange={this.yearHandler} /> Constructor Standings
@@ -107,4 +117,4 @@ export class Constructors extends Component {
   }
 }
 
-export default Constructors;
+export default withRouter(Constructors);

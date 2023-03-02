@@ -3,25 +3,27 @@ import React, { Component } from 'react';
 import './Navbar.css';
 import NavbarItem from './NavbarItem/NavbarItem';
 
-const navigationItems = [
-  {
-    name: 'Drivers',
-    link: '/drivers',
-  },
-  {
-    name: 'Constructors',
-    link: '/constructors',
-  },
-  {
-    name: 'Races',
-    link: '/races',
-  },
-];
-
 export class Navbar extends Component {
   render() {
+    const navigationItems = [
+      {
+        name: 'Drivers',
+        link: `/drivers?year=${this.props.year}`,
+      },
+      {
+        name: 'Constructors',
+        link: `/constructors?year=${this.props.year}`,
+      },
+      {
+        name: 'Races',
+        link: `/races?year=${this.props.year}`,
+      },
+    ];
+
     let navbarItems = navigationItems.map((item) => {
-      return <NavbarItem key={item.name} name={item.name} link={item.link} />;
+      return (
+        <NavbarItem key={item.name} name={item.name} link={item.link} year={this.props.year} />
+      );
     });
     return (
       <div className='navbar'>
